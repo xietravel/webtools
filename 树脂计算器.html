@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原神树脂计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3e7;
+            border: 1px solid #d4e8d4;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>原神树脂计算器</h2>
+
+        <h3>方法一：输入从当前树脂恢复到200树脂的剩余时间</h3>
+        <label for="remainingHours">剩余恢复时间（小时）</label>
+        <input type="number" id="remainingHours" placeholder="请输入剩余恢复时间（小时）">
+
+        <label for="remainingMinutes">剩余恢复时间（分钟）</label>
+        <input type="number" id="remainingMinutes" placeholder="请输入剩余恢复时间（分钟）">
+
+        <label for="targetResin1">目标树脂数量</label>
+        <input type="number" id="targetResin1" placeholder="请输入目标树脂数量">
+
+        <button onclick="calculateTimeByRemaining()">计算恢复时间</button>
+
+        <div id="result1" class="result"></div>
+
+        <h3>方法二：输入当前树脂数量</h3>
+        <label for="currentResin">当前树脂数量</label>
+        <input type="number" id="currentResin" placeholder="请输入当前树脂数量">
+
+        <label for="targetResin2">目标树脂数量</label>
+        <input type="number" id="targetResin2" placeholder="请输入目标树脂数量">
+
+        <button onclick="calculateTimeByCurrent()">计算恢复时间</button>
+
+        <div id="result2" class="result"></div>
+    </div>
+
+    <script>
+        function calculateTimeByRemaining() {
+            const remainingHours = parseInt(document.getElementById('remainingHours').value) || 0;
+            const remainingMinutes = parseInt(document.getElementById('remainingMinutes').value) || 0;
+            const targetResin = parseInt(document.getElementById('targetResin1').value) || 0;
+
+            const maxResin = 200;
+            const recoveryRate = 8; // 每8分钟恢复1点
+
+            const totalRemainingTime = (remainingHours * 60) + remainingMinutes;
+            const currentResin = maxResin - Math.ceil(totalRemainingTime / recoveryRate);
+
+            // 保持计算精确，将剩余时间换算为树脂恢复量
+            const exactCurrentResin = maxResin - totalRemainingTime / recoveryRate;
+
+            const resinNeeded = Math.max(targetResin - exactCurrentResin, 0);
+            const recoveryTime = Math.ceil(resinNeeded * recoveryRate);
+
+            const recoveryDate = new Date();
+            recoveryDate.setMinutes(recoveryDate.getMinutes() + recoveryTime);
+
+            const hours = Math.floor(recoveryTime / 60);
+            const minutes = recoveryTime % 60;
+
+            const resultText = `当前树脂数量: ${Math.floor(exactCurrentResin)}\n恢复到 ${targetResin} 树脂的时间是: ${recoveryDate.toLocaleString()}\n总恢复时间: ${hours} 小时 ${minutes} 分钟`;
+            document.getElementById('result1').innerText = resultText;
+        }
+
+        function calculateTimeByCurrent() {
+            const currentResin = parseInt(document.getElementById('currentResin').value) || 0;
+            const targetResin = parseInt(document.getElementById('targetResin2').value) || 0;
+
+            const recoveryRate = 8; // 每8分钟恢复1点
+
+            const resinNeeded = Math.max(targetResin - currentResin, 0);
+            const recoveryTime = resinNeeded * recoveryRate;
+
+            const recoveryDate = new Date();
+            recoveryDate.setMinutes(recoveryDate.getMinutes() + recoveryTime);
+
+            const hours = Math.floor(recoveryTime / 60);
+            const minutes = recoveryTime % 60;
+
+            const resultText = `恢复到 ${targetResin} 树脂的时间是: ${recoveryDate.toLocaleString()}\n总恢复时间: ${hours} 小时 ${minutes} 分钟`;
+            document.getElementById('result2').innerText = resultText;
+        }
+    </script>
+</body>
+</html>
