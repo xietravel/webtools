@@ -41,6 +41,7 @@
             background-color: #e7f3e7;
             border: 1px solid #d4e8d4;
             border-radius: 4px;
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -59,7 +60,6 @@
         <input type="number" id="targetResin1" placeholder="请输入目标树脂数量">
 
         <button onclick="calculateTimeByRemaining()">计算恢复时间</button>
-
         <div id="result1" class="result"></div>
 
         <h3>方法二：输入当前树脂数量</h3>
@@ -70,8 +70,17 @@
         <input type="number" id="targetResin2" placeholder="请输入目标树脂数量">
 
         <button onclick="calculateTimeByCurrent()">计算恢复时间</button>
-
         <div id="result2" class="result"></div>
+
+        <h3>方法三：希望在某个时间恢复到指定树脂</h3>
+        <label for="targetTime">目标时间（格式：YYYY-MM-DDTHH:MM）</label>
+        <input type="datetime-local" id="targetTime">
+
+        <label for="targetResin3">目标树脂数量</label>
+        <input type="number" id="targetResin3" placeholder="请输入目标树脂数量">
+
+        <button onclick="calculateCurrentResin()">计算当前应有树脂</button>
+        <div id="result3" class="result"></div>
     </div>
 
     <script>
@@ -81,12 +90,9 @@
             const targetResin = parseInt(document.getElementById('targetResin1').value) || 0;
 
             const maxResin = 200;
-            const recoveryRate = 8; // 每8分钟恢复1点
+            const recoveryRate = 8;
 
             const totalRemainingTime = (remainingHours * 60) + remainingMinutes;
-            const currentResin = maxResin - Math.ceil(totalRemainingTime / recoveryRate);
-
-            // 保持计算精确，将剩余时间换算为树脂恢复量
             const exactCurrentResin = maxResin - totalRemainingTime / recoveryRate;
 
             const resinNeeded = Math.max(targetResin - exactCurrentResin, 0);
@@ -106,7 +112,7 @@
             const currentResin = parseInt(document.getElementById('currentResin').value) || 0;
             const targetResin = parseInt(document.getElementById('targetResin2').value) || 0;
 
-            const recoveryRate = 8; // 每8分钟恢复1点
+            const recoveryRate = 8;
 
             const resinNeeded = Math.max(targetResin - currentResin, 0);
             const recoveryTime = resinNeeded * recoveryRate;
@@ -119,6 +125,33 @@
 
             const resultText = `恢复到 ${targetResin} 树脂的时间是: ${recoveryDate.toLocaleString()}\n总恢复时间: ${hours} 小时 ${minutes} 分钟`;
             document.getElementById('result2').innerText = resultText;
+        }
+
+        function calculateCurrentResin() {
+            const targetTimeInput = document.getElementById('targetTime').value;
+            const targetResin = parseInt(document.getElementById('targetResin3').value) || 0;
+
+            if (!targetTimeInput) {
+                document.getElementById('result3').innerText = '请输入目标时间。';
+                return;
+            }
+
+            const recoveryRate = 8;
+            const now = new Date();
+            const targetTime = new Date(targetTimeInput);
+
+            const diffMinutes = Math.floor((targetTime - now) / 60000);
+
+            if (diffMinutes < 0) {
+                document.getElementById('result3').innerText = '目标时间已过去，请输入未来的时间。';
+                return;
+            }
+
+            const resinRecovered = Math.floor(diffMinutes / recoveryRate);
+            const currentResin = Math.max(targetResin - resinRecovered, 0);
+
+            const resultText = `从现在起到 ${targetTime.toLocaleString()} 还有 ${diffMinutes} 分钟，\n预计可恢复 ${resinRecovered} 点树脂，\n因此你现在至少需要有 ${currentResin} 点树脂，才能在目标时间达到 ${targetResin} 点。`;
+            document.getElementById('result3').innerText = resultText;
         }
     </script>
 </body>
